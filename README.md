@@ -32,7 +32,9 @@ cd SpringBoot-blog
 ## 📚 API 문서
 모든 API 엔드포인트는 Swagger UI에서 확인하고 테스트할 수 있습니다.
 
-**Swagger UI**: http://localhost:8080/swagger-ui.html
+**온라인 문서**: https://eunseo9311.github.io/SpringBoot-blog/
+
+**로컬 Swagger UI**: http://localhost:8080/swagger-ui.html (애플리케이션 실행 후)
 
 ## 🎯 주요 기능
 
