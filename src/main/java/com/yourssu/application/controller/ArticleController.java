@@ -4,6 +4,10 @@ import com.yourssu.application.entity.Article;
 import com.yourssu.application.response.ArticleDTO;
 import com.yourssu.application.service.ArticleService;
 import com.yourssu.application.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +17,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/articles")
+@Tag(name = "Article", description = "게시글 관리 API")
 public class ArticleController {
 
     private final ArticleService articleService;
@@ -24,6 +29,8 @@ public class ArticleController {
     }
 
     @GetMapping
+    @Operation(summary = "모든 게시글 조회", description = "모든 게시글을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "성공적으로 게시글 목록을 조회했습니다.")
     public ResponseEntity<List<ArticleDTO>> getAllArticles() {
         List<Article> articles = articleService.getAllArticles();
         return new ResponseEntity<>(articles.stream()
@@ -32,15 +39,22 @@ public class ArticleController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ArticleDTO> getArticleById(@PathVariable Long id) {
+    @Operation(summary = "게시글 조회", description = "ID로 특정 게시글을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "게시글 조회 성공")
+    @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없습니다.")
+    public ResponseEntity<ArticleDTO> getArticleById(@Parameter(description = "게시글 ID") @PathVariable Long id) {
         Optional<Article> article = articleService.getArticleById(id);
         return article.map(value -> new ResponseEntity<>(new ArticleDTO(value), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "게시글 삭제", description = "게시글을 삭제합니다.")
+    @ApiResponse(responseCode = "200", description = "게시글 삭제 성공")
+    @ApiResponse(responseCode = "401", description = "인증 실패")
+    @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없습니다.")
     public ResponseEntity<?> deleteArticleById(
-            @PathVariable Long id,
+            @Parameter(description = "게시글 ID") @PathVariable Long id,
             @RequestBody DeleteArticleRequest deleteRequest) {
 
         Optional<Article> articleOptional = articleService.getArticleById(id);
@@ -59,6 +73,10 @@ public class ArticleController {
     }
 
     @PostMapping
+    @Operation(summary = "게시글 작성", description = "새로운 게시글을 작성합니다.")
+    @ApiResponse(responseCode = "200", description = "게시글 작성 성공")
+    @ApiResponse(responseCode = "400", description = "제목 또는 내용이 비어있습니다.")
+    @ApiResponse(responseCode = "401", description = "인증 실패")
     public ResponseEntity<?> createArticle(@RequestBody ArticleRequest request) {
         if (request.getTitle() == null || request.getTitle().trim().isEmpty() ||
                 request.getContent() == null || request.getContent().trim().isEmpty()) {
@@ -76,7 +94,12 @@ public class ArticleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateArticle(@PathVariable Long id, @RequestBody ArticleUpdateRequest request) {
+    @Operation(summary = "게시글 수정", description = "기존 게시글을 수정합니다.")
+    @ApiResponse(responseCode = "200", description = "게시글 수정 성공")
+    @ApiResponse(responseCode = "400", description = "제목 또는 내용이 비어있습니다.")
+    @ApiResponse(responseCode = "401", description = "인증 실패")
+    @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없습니다.")
+    public ResponseEntity<?> updateArticle(@Parameter(description = "게시글 ID") @PathVariable Long id, @RequestBody ArticleUpdateRequest request) {
         if (request.getTitle() == null || request.getTitle().trim().isEmpty() ||
                 request.getContent() == null || request.getContent().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Title and content must not be empty.");
