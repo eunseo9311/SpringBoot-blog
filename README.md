@@ -24,17 +24,10 @@ cd SpringBoot-blog
 ./gradlew bootRun
 ```
 
-### 3. 접속 확인
-- **애플리케이션**: http://localhost:8080
-- **Swagger UI**: http://localhost:8080/swagger-ui.html
-- **H2 Console**: http://localhost:8080/h2-console
-
 ## 📚 API 문서
-모든 API 엔드포인트는 Swagger UI에서 확인하고 테스트할 수 있습니다.
+모든 API 엔드포인트는 온라인 Swagger UI에서 확인하고 테스트할 수 있습니다.
 
-**온라인 문서**: https://eunseo9311.github.io/SpringBoot-blog/
-
-**로컬 Swagger UI**: http://localhost:8080/swagger-ui.html (애플리케이션 실행 후)
+**📖 [API 문서 보기](https://eunseo9311.github.io/SpringBoot-blog/)**
 
 ## 🎯 주요 기능
 
