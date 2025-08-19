@@ -20,7 +20,7 @@ public class UserRepositoryTest {
     public void testSaveAndFindById() {
         User user = new User();
         user.setEmail("user@example.com");
-        user.setUsername("user");
+        user.setNickname("user");
         user.setPassword("password");
         user = userRepository.save(user);
 
@@ -33,25 +33,25 @@ public class UserRepositoryTest {
     public void testFindByEmail() {
         User user = new User();
         user.setEmail("find@example.com");
-        user.setUsername("finduser");
+        user.setNickname("finduser");
         user.setPassword("password");
         user = userRepository.save(user);
 
         Optional<User> found = userRepository.findByEmail("find@example.com");
         assertTrue(found.isPresent());
-        assertEquals("finduser", found.get().getUsername());
+        assertEquals("finduser", found.get().getNickname());
     }
 
     @Test
     public void testFindAll() {
         User user1 = new User();
         user1.setEmail("a@example.com");
-        user1.setUsername("a");
+        user1.setNickname("a");
         user1.setPassword("password");
 
         User user2 = new User();
         user2.setEmail("b@example.com");
-        user2.setUsername("b");
+        user2.setNickname("b");
         user2.setPassword("password");
 
         userRepository.save(user1);

@@ -24,7 +24,7 @@ public class ArticleRepositoryTest {
         // 테스트용 사용자 생성
         User user = new User();
         user.setEmail("test@example.com");
-        user.setUsername("testuser");
+        user.setNickname("testuser");
         user.setPassword("password"); // Repository 테스트에서는 암호화 여부와 무관하게 저장
         user = userRepository.save(user);
 
@@ -46,13 +46,13 @@ public class ArticleRepositoryTest {
         // 두 사용자를 생성합니다.
         User user1 = new User();
         user1.setEmail("user1@example.com");
-        user1.setUsername("user1");
+        user1.setNickname("user1");
         user1.setPassword("password");
         user1 = userRepository.save(user1);
 
         User user2 = new User();
         user2.setEmail("user2@example.com");
-        user2.setUsername("user2");
+        user2.setNickname("user2");
         user2.setPassword("password");
         user2 = userRepository.save(user2);
 

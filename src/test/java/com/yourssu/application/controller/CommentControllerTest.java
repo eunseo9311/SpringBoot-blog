@@ -55,7 +55,7 @@ public class CommentControllerTest {
         testUser = new User();
         testUser.setEmail("commentuser@example.com");
         testUser.setPassword(encoder.encode("password")); // 평문 "password"를 암호화해서 저장
-        testUser.setUsername("commentUser");
+        testUser.setNickname("commentUser");
         userRepository.save(testUser);
 
         // 테스트용 게시글 생성

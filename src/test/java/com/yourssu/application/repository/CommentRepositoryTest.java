@@ -28,7 +28,7 @@ public class CommentRepositoryTest {
         // 테스트용 사용자 및 게시글 생성
         User user = new User();
         user.setEmail("user@example.com");
-        user.setUsername("user");
+        user.setNickname("user");
         user.setPassword("password");
         user = userRepository.save(user);
 
@@ -56,7 +56,7 @@ public class CommentRepositoryTest {
         // 사용자, 게시글, 댓글 생성
         User user = new User();
         user.setEmail("user2@example.com");
-        user.setUsername("user2");
+        user.setNickname("user2");
         user.setPassword("password");
         user = userRepository.save(user);
 
@@ -87,7 +87,7 @@ public class CommentRepositoryTest {
         // 사용자, 게시글, 댓글 생성
         User user = new User();
         user.setEmail("user3@example.com");
-        user.setUsername("user3");
+        user.setNickname("user3");
         user.setPassword("password");
         user = userRepository.save(user);
 
@@ -120,7 +120,7 @@ public class CommentRepositoryTest {
         // 사용자, 게시글, 댓글 생성
         User user = new User();
         user.setEmail("user4@example.com");
-        user.setUsername("user4");
+        user.setNickname("user4");
         user.setPassword("password");
         user = userRepository.save(user);
 

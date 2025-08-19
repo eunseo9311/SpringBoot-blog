@@ -53,7 +53,7 @@ public class ArticleControllerTest {
         testUser.setEmail("test@example.com");
         // 평문 "password"를 암호화해서 저장
         testUser.setPassword(encoder.encode("password"));
-        testUser.setUsername("testuser");
+        testUser.setNickname("testuser");
         userRepository.save(testUser);
     }
 

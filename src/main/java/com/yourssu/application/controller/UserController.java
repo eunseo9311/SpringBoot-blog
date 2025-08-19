@@ -31,7 +31,7 @@ public class UserController {
     public ResponseEntity<List<UserIdDTO>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         return new ResponseEntity<>(users.stream()
-                .map(user -> new UserIdDTO(user.getEmail(), user.getUsername(), user.getId()))
+                .map(user -> new UserIdDTO(user.getEmail(), user.getNickname(), user.getId()))
                 .toList(), HttpStatus.OK);
     }
 
@@ -49,9 +49,9 @@ public class UserController {
     @Operation(summary = "사용자 등록", description = "새로운 사용자를 등록합니다.")
     @ApiResponse(responseCode = "200", description = "사용자 등록 성공")
     public ResponseEntity<UserDTO> createUser(@RequestBody UserRequest request) {
-        User newUser = new User(request.getEmail(), request.getUsername(), request.getPassword());
+        User newUser = new User(request.getEmail(), request.getNickname(), request.getPassword());
         User savedUser = userService.saveUser(newUser);
-        return ResponseEntity.ok(new UserDTO(savedUser.getEmail(), savedUser.getUsername()));
+        return ResponseEntity.ok(new UserDTO(savedUser.getEmail(), savedUser.getNickname()));
     }
 
     @DeleteMapping("/{id}")
@@ -78,14 +78,14 @@ public class UserController {
 class UserRequest {
     private String email;
     private String password;
-    private String username;
+    private String nickname;
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getNickname() { return nickname; }
+    public void setNickname(String nickname) { this.nickname = nickname; }
 }
 
 class DeleteUserRequest {

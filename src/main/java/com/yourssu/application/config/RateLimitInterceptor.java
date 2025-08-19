@@ -24,7 +24,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             
             // IP당 1분에 5회 제한
             if (!rateLimitService.isAllowed(clientIp, 5, 60)) {
-                response.setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
+                response.setStatus(429); // 429 Too Many Requests
                 response.getWriter().write("{\"error\": \"Too many requests. Please try again later.\"}");
                 return false;
             }
