@@ -27,5 +27,8 @@ jwt:
 
 logging:
   level:
-    com.yourssu.application: DEBUG
+    com.blog.application: DEBUG
     org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate: DEBUG
+    root: INFO

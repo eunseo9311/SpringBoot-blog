@@ -1,8 +1,8 @@
 package com.blog.application.service;
 
 import com.blog.application.entity.Article;
-import com.blog.application.repository.ArticleRepository;
-import com.blog.application.repository.CommentRepository;
+import com.blog.application.repository.jpa.ArticleRepository;
+import com.blog.application.repository.jpa.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

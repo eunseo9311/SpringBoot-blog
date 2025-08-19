@@ -8,18 +8,18 @@ import org.springframework.data.redis.core.TimeToLive;
 public class RefreshToken {
     
     @Id
-    private String email;
-    
     private String token;
+    
+    private String email;
     
     @TimeToLive
     private Long ttl; // seconds
     
     public RefreshToken() {}
     
-    public RefreshToken(String email, String token, Long ttl) {
-        this.email = email;
+    public RefreshToken(String token, String email, Long ttl) {
         this.token = token;
+        this.email = email;
         this.ttl = ttl;
     }
     

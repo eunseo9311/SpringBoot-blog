@@ -1,7 +1,7 @@
 package com.blog.application.security;
 
 import com.blog.application.entity.User;
-import com.blog.application.repository.UserRepository;
+import com.blog.application.repository.jpa.UserRepository;
 import com.blog.application.service.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

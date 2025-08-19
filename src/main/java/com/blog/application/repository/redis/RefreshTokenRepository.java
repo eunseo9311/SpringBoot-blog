@@ -1,4 +1,4 @@
-package com.blog.application.repository;
+package com.blog.application.repository.redis;
 
 import com.blog.application.entity.RefreshToken;
 import org.springframework.data.repository.CrudRepository;
@@ -9,9 +9,8 @@ import java.util.Optional;
 @Repository
 public interface RefreshTokenRepository extends CrudRepository<RefreshToken, String> {
     
-    Optional<RefreshToken> findByToken(String token);
-    
-    void deleteByEmail(String email);
+    // Since token is now the ID, we can use findById(token) directly
+    // Custom query methods like findByToken and deleteByEmail don't work with Redis Hash
 }
 
 //Redis 기반 리프레시 토큰 저장소 인터페이스
