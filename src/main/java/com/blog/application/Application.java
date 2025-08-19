@@ -2,10 +2,13 @@ package com.blog.application;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+//import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
 @SpringBootApplication
+@EnableJpaRepositories(basePackages = "com.blog.application.repository.jpa")
+//@EnableRedisRepositories(basePackages = "com.blog.application.repository.redis")  // Redis 사용하지 않으므로 비활성화
 public class Application {
-    // Spring Boot 애플리케이션의 진입점 (main 메서드)
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }

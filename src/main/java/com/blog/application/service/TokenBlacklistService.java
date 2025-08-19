@@ -1,32 +1,35 @@
 package com.blog.application.service;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class TokenBlacklistService {
     
-    private final RedisTemplate<String, Object> redisTemplate;
-    private static final String BLACKLIST_PREFIX = "blacklist:";
-    
-    public TokenBlacklistService(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
+    // 임시로 메모리 기반 저장소 사용 (프로덕션에서는 Redis 사용 권장)
+    private final Map<String, Long> blacklistedTokens = new ConcurrentHashMap<>();
     
     public void blacklistToken(String token, long expirationTimeMs) {
-        String key = BLACKLIST_PREFIX + token;
-        long ttlSeconds = (expirationTimeMs - System.currentTimeMillis()) / 1000;
-        
-        if (ttlSeconds > 0) {
-            redisTemplate.opsForValue().set(key, "blacklisted", ttlSeconds, TimeUnit.SECONDS);
+        if (expirationTimeMs > System.currentTimeMillis()) {
+            blacklistedTokens.put(token, expirationTimeMs);
         }
     }
     
     public boolean isTokenBlacklisted(String token) {
-        String key = BLACKLIST_PREFIX + token;
-        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+        Long expirationTime = blacklistedTokens.get(token);
+        if (expirationTime == null) {
+            return false;
+        }
+        
+        // 만료된 토큰은 자동으로 제거
+        if (expirationTime <= System.currentTimeMillis()) {
+            blacklistedTokens.remove(token);
+            return false;
+        }
+        
+        return true;
     }
 }
 

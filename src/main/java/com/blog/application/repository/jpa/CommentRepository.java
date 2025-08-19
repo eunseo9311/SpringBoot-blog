@@ -1,4 +1,4 @@
-package com.blog.application.repository;
+package com.blog.application.repository.jpa;
 
 import com.blog.application.entity.Article;
 import com.blog.application.entity.Comment;
