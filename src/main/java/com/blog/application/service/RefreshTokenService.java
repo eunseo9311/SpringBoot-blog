@@ -1,26 +1,29 @@
 package com.blog.application.service;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class RefreshTokenService {
     
-    // 임시로 메모리 기반 저장소 사용 (프로덕션에서는 Redis 사용 권장)
-    private final Map<String, String> refreshTokenStore = new ConcurrentHashMap<>();
+    private final RedisTemplate<String, Object> redisTemplate;
+    
+    public RefreshTokenService(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
     
     public void saveRefreshToken(String token, String email, long ttlSeconds) {
-        refreshTokenStore.put(token, email);
+        redisTemplate.opsForValue().set(token, email, ttlSeconds, TimeUnit.SECONDS);
     }
     
     public String getRefreshTokenEmail(String token) {
-        return refreshTokenStore.get(token);
+        return (String) redisTemplate.opsForValue().get(token);
     }
     
     public void deleteRefreshToken(String token) {
-        refreshTokenStore.remove(token);
+        redisTemplate.delete(token);
     }
 }
 

@@ -1,61 +1,43 @@
 package com.blog.application.service;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class RateLimitService {
     
-    // 임시로 메모리 기반 저장소 사용 (프로덕션에서는 Redis 사용 권장)
-    private final Map<String, RateLimitEntry> rateLimitMap = new ConcurrentHashMap<>();
+    private static final String RATE_LIMIT_PREFIX = "rate_limit:";
+    private final RedisTemplate<String, Object> redisTemplate;
+    
+    public RateLimitService(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
     
     public boolean isAllowed(String identifier, int maxAttempts, int windowSeconds) {
-        long currentTime = System.currentTimeMillis();
-        long windowMs = windowSeconds * 1000L;
+        String key = RATE_LIMIT_PREFIX + identifier;
+        String currentCount = (String) redisTemplate.opsForValue().get(key);
         
-        RateLimitEntry entry = rateLimitMap.get(identifier);
-        
-        if (entry == null || (currentTime - entry.getStartTime()) > windowMs) {
-            // 첫 번째 시도 또는 윈도우 만료
-            rateLimitMap.put(identifier, new RateLimitEntry(currentTime, 1));
+        if (currentCount == null) {
+            // 첫 번째 시도
+            redisTemplate.opsForValue().set(key, "1", windowSeconds, TimeUnit.SECONDS);
             return true;
         }
         
-        if (entry.getCount() >= maxAttempts) {
+        int count = Integer.parseInt(currentCount);
+        if (count >= maxAttempts) {
             return false; // 제한 초과
         }
         
         // 카운터 증가
-        entry.incrementCount();
+        redisTemplate.opsForValue().increment(key);
         return true;
     }
     
     public void resetLimit(String identifier) {
-        rateLimitMap.remove(identifier);
-    }
-    
-    private static class RateLimitEntry {
-        private final long startTime;
-        private int count;
-        
-        public RateLimitEntry(long startTime, int count) {
-            this.startTime = startTime;
-            this.count = count;
-        }
-        
-        public long getStartTime() {
-            return startTime;
-        }
-        
-        public int getCount() {
-            return count;
-        }
-        
-        public void incrementCount() {
-            this.count++;
-        }
+        String key = RATE_LIMIT_PREFIX + identifier;
+        redisTemplate.delete(key);
     }
 }
 
