@@ -20,7 +20,8 @@ public class User {
     private String email;
 
     @NotBlank
-    private String username;
+    @Column(nullable = false)
+    private String nickname;
 
     @NotBlank
     private String password;
@@ -36,9 +37,9 @@ public class User {
 
     public User() {}
 
-    public User(String email, String username, String password) {
+    public User(String email, String nickname, String password) {
         this.email = email;
-        this.username = username;
+        this.nickname = nickname;
         this.password = password;
     }
 
@@ -55,11 +56,11 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
-    public String getUsername() {
-        return username;
+    public String getNickname() {
+        return nickname;
     }
-    public void setUsername(String username) {
-        this.username = username;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
     public String getPassword() {
         return password;
@@ -81,5 +82,5 @@ public class User {
     }
 }
 
-//User 엔티티는 사용자 정보를 저장하며, 이메일, 사용자명, 암호를 필드로 가진다
+//User 엔티티는 사용자 정보를 저장하며, 이메일, 닉네임, 암호를 필드로 가진다
 //사용자가 작성한 게시글과 댓글과의 일대다 관계를 설정하여, 회원 탈퇴 시 관련 데이터도 함께 처리할 수 있도록 구성된다

@@ -2,18 +2,18 @@ package com.yourssu.application.response;
 
 public class UserIdDTO {
     private String email;
-    private String username;
+    private String nickname;
     private Long id;
     // password 등 민감 정보는 포함하지 않음
 
 
-    public UserIdDTO(String email, String username, Long id) {
+    public UserIdDTO(String email, String nickname, Long id) {
         this.email = email;
-        this.username = username;
+        this.nickname = nickname;
         this.id = id;
     }
 
-    // 생성자: 이메일, 사용자명, 사용자 ID 포함
+    // 생성자: 이메일, 닉네임, 사용자 ID 포함
     public String getEmail() {
         return email;
     }
@@ -22,12 +22,12 @@ public class UserIdDTO {
         this.email = email;
     }
 
-    public String getUsername() {
-        return username;
+    public String getNickname() {
+        return nickname;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public Long getId() {
@@ -39,4 +39,4 @@ public class UserIdDTO {
     }
 }
 
-//UserIdDTO는 사용자 목록 조회 시, 사용자 ID와 함께 이메일, 사용자명을 클라이언트에 반환하기 위한 DTO이다
+//UserIdDTO는 사용자 목록 조회 시, 사용자 ID와 함께 이메일, 닉네임을 클라이언트에 반환하기 위한 DTO이다
