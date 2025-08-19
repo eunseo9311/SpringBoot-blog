@@ -1,9 +1,7 @@
 package com.blog.application.service;
 
-import com.blog.application.entity.RefreshToken;
 import com.blog.application.entity.User;
 import com.blog.application.exception.AuthException;
-import com.blog.application.repository.redis.RefreshTokenRepository;
 import com.blog.application.repository.jpa.UserRepository;
 import com.blog.application.request.LoginRequestDTO;
 import com.blog.application.request.RefreshTokenRequestDTO;
@@ -22,18 +20,18 @@ import java.util.Optional;
 public class AuthService {
     
     private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService tokenBlacklistService;
     
     public AuthService(UserRepository userRepository,
-                      RefreshTokenRepository refreshTokenRepository,
+                      RefreshTokenService refreshTokenService,
                       PasswordEncoder passwordEncoder,
                       JwtUtil jwtUtil,
                       TokenBlacklistService tokenBlacklistService) {
         this.userRepository = userRepository;
-        this.refreshTokenRepository = refreshTokenRepository;
+        this.refreshTokenService = refreshTokenService;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.tokenBlacklistService = tokenBlacklistService;
@@ -69,15 +67,8 @@ public class AuthService {
         String accessToken = jwtUtil.generateAccessToken(user.getEmail());
         String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
         
-        // 기존 리프레시 토큰 삭제는 수동으로 처리 (Redis에서는 email 기반 삭제가 복잡)
-        // 새로운 토큰을 저장하면 이전 토큰은 만료되므로 보안상 문제없음
-        
-        RefreshToken refreshTokenEntity = new RefreshToken(
-                refreshToken,
-                user.getEmail(), 
-                1209600L // 2주 (초 단위)
-        );
-        refreshTokenRepository.save(refreshTokenEntity);
+        // RefreshToken을 메모리에 저장 (TTL은 JWT 자체 만료로 처리)
+        refreshTokenService.saveRefreshToken(refreshToken, user.getEmail(), 1209600L);
         
         return new LoginResponseDTO(accessToken, refreshToken, jwtUtil.getAccessTokenValidityMs() / 1000);
     }
@@ -88,25 +79,19 @@ public class AuthService {
             throw new AuthException("유효하지 않은 리프레시 토큰입니다.");
         }
         
-        // 저장된 리프레시 토큰 조회 (token이 이제 ID이므로 findById 사용)
-        RefreshToken storedToken = refreshTokenRepository.findById(refreshRequest.getRefreshToken())
-                .orElseThrow(() -> new AuthException("존재하지 않는 리프레시 토큰입니다."));
-        
-        String email = jwtUtil.getEmailFromToken(refreshRequest.getRefreshToken());
+        // 저장된 리프레시 토큰 조회
+        String email = refreshTokenService.getRefreshTokenEmail(refreshRequest.getRefreshToken());
+        if (email == null) {
+            throw new AuthException("존재하지 않는 리프레시 토큰입니다.");
+        }
         
         // 새로운 토큰 생성 (토큰 로테이션)
         String newAccessToken = jwtUtil.generateAccessToken(email);
         String newRefreshToken = jwtUtil.generateRefreshToken(email);
         
         // 기존 리프레시 토큰 삭제 후 새 토큰 저장
-        refreshTokenRepository.delete(storedToken);
-        
-        RefreshToken newRefreshTokenEntity = new RefreshToken(
-                newRefreshToken,
-                email,
-                1209600L // 2주 (초 단위)
-        );
-        refreshTokenRepository.save(newRefreshTokenEntity);
+        refreshTokenService.deleteRefreshToken(refreshRequest.getRefreshToken());
+        refreshTokenService.saveRefreshToken(newRefreshToken, email, 1209600L);
         
         return new LoginResponseDTO(newAccessToken, newRefreshToken, jwtUtil.getAccessTokenValidityMs() / 1000);
     }
