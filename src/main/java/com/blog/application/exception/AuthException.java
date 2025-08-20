@@ -1,14 +1,19 @@
 package com.blog.application.exception;
 
 public class AuthException extends RuntimeException {
+    private final String errorCode;
     
     public AuthException(String message) {
         super(message);
+        this.errorCode = "AUTH_ERROR";
     }
     
-    public AuthException(String message, Throwable cause) {
-        super(message, cause);
+    public AuthException(String message, String errorCode) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+    
+    public String getErrorCode() {
+        return errorCode;
     }
 }
-
-//인증 관련 커스텀 예외 클래스

@@ -44,6 +44,21 @@ public class GlobalExceptionHandler {
             .body(errorResponse);
     }
     
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<ErrorResponse> handleAuthException(
+            AuthException e, HttpServletRequest request) {
+        
+        ErrorResponse errorResponse = new ErrorResponse(
+            e.getMessage(),
+            e.getErrorCode(),
+            request.getRequestURI()
+        );
+        
+        return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
+            .body(errorResponse);
+    }
+    
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(
             MethodArgumentNotValidException e, HttpServletRequest request) {
