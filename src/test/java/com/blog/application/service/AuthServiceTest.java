@@ -2,8 +2,7 @@ package com.blog.application.service;
 
 import com.blog.application.entity.User;
 import com.blog.application.exception.AuthException;
-import com.blog.application.repository.RefreshTokenRepository;
-import com.blog.application.repository.UserRepository;
+import com.blog.application.repository.jpa.UserRepository;
 import com.blog.application.request.LoginRequestDTO;
 import com.blog.application.request.SignupRequestDTO;
 import com.blog.application.response.LoginResponseDTO;
@@ -21,7 +20,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -30,7 +30,7 @@ class AuthServiceTest {
     private UserRepository userRepository;
     
     @Mock
-    private RefreshTokenRepository refreshTokenRepository;
+    private RefreshTokenService refreshTokenService;
     
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -59,24 +59,24 @@ class AuthServiceTest {
     @Test
     void signup_성공() {
         // given
-        when(userRepository.findByEmail(signupRequest.getEmail())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(signupRequest.getPassword())).thenReturn("encodedPassword");
-        when(userRepository.save(any(User.class))).thenReturn(mockUser);
+        given(userRepository.findByEmail(signupRequest.getEmail())).willReturn(Optional.empty());
+        given(passwordEncoder.encode(signupRequest.getPassword())).willReturn("encodedPassword");
+        given(userRepository.save(any(User.class))).willReturn(mockUser);
         
         // when
         SignupResponseDTO response = authService.signup(signupRequest);
         
         // then
         assertThat(response.getUserId()).isEqualTo(1L);
-        verify(userRepository).findByEmail(signupRequest.getEmail());
-        verify(passwordEncoder).encode(signupRequest.getPassword());
-        verify(userRepository).save(any(User.class));
+        then(userRepository).should().findByEmail(signupRequest.getEmail());
+        then(passwordEncoder).should().encode(signupRequest.getPassword());
+        then(userRepository).should().save(any(User.class));
     }
     
     @Test
     void signup_이메일_중복_실패() {
         // given
-        when(userRepository.findByEmail(signupRequest.getEmail())).thenReturn(Optional.of(mockUser));
+        given(userRepository.findByEmail(signupRequest.getEmail())).willReturn(Optional.of(mockUser));
         
         // when & then
         assertThatThrownBy(() -> authService.signup(signupRequest))
