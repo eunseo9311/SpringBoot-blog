@@ -6,6 +6,7 @@ import com.blog.application.request.SignupRequestDTO;
 import com.blog.application.response.LoginResponseDTO;
 import com.blog.application.response.SignupResponseDTO;
 import com.blog.application.service.AuthService;
+import com.blog.application.service.EventLogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -22,9 +23,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     
     private final AuthService authService;
+    private final EventLogService eventLogService;
     
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, EventLogService eventLogService) {
         this.authService = authService;
+        this.eventLogService = eventLogService;
     }
     
     @PostMapping("/signup")
@@ -36,6 +39,7 @@ public class AuthController {
     public ResponseEntity<SignupResponseDTO> signup(@Valid @RequestBody SignupRequestDTO signupRequest) {
         try {
             SignupResponseDTO response = authService.signup(signupRequest);
+            eventLogService.logSignupEvent(signupRequest.getEmail(), signupRequest.getNickname(), response.getUserId());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException | com.blog.application.exception.AuthException e) {
             return ResponseEntity.badRequest().build();
@@ -51,8 +55,10 @@ public class AuthController {
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
         try {
             LoginResponseDTO response = authService.login(loginRequest);
+            eventLogService.logLoginEvent(loginRequest.getEmail(), true, null);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException | com.blog.application.exception.AuthException e) {
+            eventLogService.logLoginEvent(loginRequest.getEmail(), false, e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
@@ -66,8 +72,12 @@ public class AuthController {
     public ResponseEntity<LoginResponseDTO> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO refreshRequest) {
         try {
             LoginResponseDTO response = authService.refreshToken(refreshRequest);
+            String email = authService.getEmailFromRefreshToken(refreshRequest.getRefreshToken());
+            eventLogService.logTokenRefreshEvent(email, true);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException | com.blog.application.exception.AuthException e) {
+            String email = authService.getEmailFromRefreshToken(refreshRequest.getRefreshToken());
+            eventLogService.logTokenRefreshEvent(email != null ? email : "unknown", false);
             return ResponseEntity.badRequest().build();
         }
     }
@@ -81,7 +91,9 @@ public class AuthController {
     public ResponseEntity<Void> logout(HttpServletRequest request) {
         try {
             String authHeader = request.getHeader("Authorization");
+            String email = authService.getEmailFromToken(authHeader);
             authService.logout(authHeader);
+            eventLogService.logLogoutEvent(email);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException | com.blog.application.exception.AuthException e) {
             return ResponseEntity.badRequest().build();

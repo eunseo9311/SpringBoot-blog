@@ -121,6 +121,31 @@ public class AuthService {
         long accessTokenExpirationTime = System.currentTimeMillis() + jwtUtil.getAccessTokenValidityMs();
         tokenBlacklistService.blacklistToken(accessToken, accessTokenExpirationTime);
     }
+    
+    public String getEmailFromToken(String authHeader) {
+        if (authHeader == null || authHeader.isEmpty()) {
+            return null;
+        }
+        
+        String token = authHeader;
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        
+        try {
+            return jwtUtil.getEmailFromToken(token);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    public String getEmailFromRefreshToken(String refreshToken) {
+        try {
+            return jwtUtil.getEmailFromToken(refreshToken);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
 
 //인증 서비스 클래스
