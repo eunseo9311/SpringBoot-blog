@@ -47,13 +47,16 @@ brew install redis && brew services start redis
 
 ## 🎯 주요 기능
 
-| 기능 | 엔드포인트 | 인증 |
-|-----|-----------|------|
-| 회원가입 | `POST /api/auth/signup` | ❌ |
-| 로그인 | `POST /api/auth/login` | ❌ |
-| 게시글 작성 | `POST /articles` | ✅ |
-| 게시글 조회 | `GET /articles` | ❌ |
-| 댓글 작성 | `POST /articles/{id}/comments` | ✅ |
+### 🔓 공개 API (인증 불필요)
+- **회원가입**: `POST /api/auth/signup`
+- **로그인**: `POST /api/auth/login` → JWT 토큰 발급
+- **게시글 조회**: `GET /articles`
+- **댓글 조회**: `GET /articles/{id}/comments`
+
+### 🔒 인증 필요 API
+- **게시글 작성/수정/삭제**: `POST/PUT/DELETE /articles`
+- **댓글 작성/수정/삭제**: `POST/PUT/DELETE /articles/{id}/comments`
+- **회원 탈퇴**: `DELETE /users/{id}`
 
 ## 🗃 데이터 저장소
 - **H2 Database**: 사용자, 게시글, 댓글 데이터
