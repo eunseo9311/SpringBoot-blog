@@ -1,5 +1,7 @@
 package com.blog.application.controller;
 
+import com.blog.application.common.response.ApiResponse;
+import com.blog.application.common.status.SuccessStatus;
 import com.blog.application.request.LoginRequestDTO;
 import com.blog.application.request.RefreshTokenRequestDTO;
 import com.blog.application.request.SignupRequestDTO;
@@ -9,7 +11,7 @@ import com.blog.application.service.AuthService;
 import com.blog.application.service.EventLogService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,51 +34,52 @@ public class AuthController {
     @PostMapping("/signup")
     @Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "회원가입 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 (이메일 중복, 유효성 검사 실패)")
+            @SwaggerApiResponse(responseCode = "201", description = "회원가입 성공"),
+            @SwaggerApiResponse(responseCode = "400", description = "잘못된 요청 (이메일 중복, 유효성 검사 실패)")
     })
-    public ResponseEntity<SignupResponseDTO> signup(@Valid @RequestBody SignupRequestDTO signupRequest) {
+    public ResponseEntity<ApiResponse<SignupResponseDTO>> signup(@Valid @RequestBody SignupRequestDTO signupRequest) {
         SignupResponseDTO response = authService.signup(signupRequest);
         eventLogService.logSignupEvent(signupRequest.getEmail(), signupRequest.getNickname(), response.getUserId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(SuccessStatus.SIGNUP_SUCCESS, response));
     }
     
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "사용자 인증 후 JWT 토큰을 발급합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로그인 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 로그인 정보")
+            @SwaggerApiResponse(responseCode = "200", description = "로그인 성공"),
+            @SwaggerApiResponse(responseCode = "400", description = "잘못된 로그인 정보")
     })
-    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
+    public ResponseEntity<ApiResponse<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
         LoginResponseDTO response = authService.login(loginRequest);
         eventLogService.logLoginEvent(loginRequest.getEmail(), true, null);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(SuccessStatus.LOGIN_SUCCESS, response));
     }
     
     @PostMapping("/refresh")
     @Operation(summary = "토큰 갱신", description = "리프레시 토큰을 이용하여 새로운 액세스 토큰을 발급합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "토큰 갱신 성공"),
-            @ApiResponse(responseCode = "400", description = "유효하지 않은 리프레시 토큰")
+            @SwaggerApiResponse(responseCode = "200", description = "토큰 갱신 성공"),
+            @SwaggerApiResponse(responseCode = "400", description = "유효하지 않은 리프레시 토큰")
     })
-    public ResponseEntity<LoginResponseDTO> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO refreshRequest) {
+    public ResponseEntity<ApiResponse<LoginResponseDTO>> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO refreshRequest) {
         LoginResponseDTO response = authService.refreshToken(refreshRequest);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(SuccessStatus.TOKEN_REFRESH_SUCCESS, response));
     }
     
     @PostMapping("/logout")
     @Operation(summary = "로그아웃", description = "액세스 토큰을 무효화하고 리프레시 토큰을 삭제합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
-            @ApiResponse(responseCode = "400", description = "유효하지 않은 토큰")
+            @SwaggerApiResponse(responseCode = "200", description = "로그아웃 성공"),
+            @SwaggerApiResponse(responseCode = "400", description = "유효하지 않은 토큰")
     })
-    public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetails userDetails,
-                                       HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal UserDetails userDetails,
+                                                    HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         String email = userDetails.getUsername(); // JWT 필터에서 email을 username으로 설정
         authService.logout(authHeader, email);
         eventLogService.logLogoutEvent(email);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success(SuccessStatus.LOGOUT_SUCCESS));
     }
 }
 
