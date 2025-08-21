@@ -5,6 +5,7 @@ import com.blog.application.repository.jpa.UserRepository;
 import com.blog.application.service.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,19 +20,12 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final TokenBlacklistService tokenBlacklistService;
-    
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, 
-                                  UserRepository userRepository,
-                                  TokenBlacklistService tokenBlacklistService) {
-        this.jwtUtil = jwtUtil;
-        this.userRepository = userRepository;
-        this.tokenBlacklistService = tokenBlacklistService;
-    }
     
     @Override
     protected void doFilterInternal(HttpServletRequest request, 

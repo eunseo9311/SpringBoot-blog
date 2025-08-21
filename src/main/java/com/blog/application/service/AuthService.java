@@ -97,7 +97,7 @@ public class AuthService {
         return new LoginResponseDTO(newAccessToken, newRefreshToken, jwtUtil.getAccessTokenValidityMs() / 1000);
     }
     
-    public void logout(String accessToken) {
+    public void logout(String accessToken, String email) {
         if (accessToken == null || accessToken.isEmpty()) {
             throw new IllegalArgumentException("액세스 토큰이 필요합니다.");
         }
@@ -111,8 +111,6 @@ public class AuthService {
         if (!jwtUtil.validateToken(accessToken)) {
             throw new AuthException("유효하지 않은 토큰입니다.");
         }
-        
-        String email = jwtUtil.getEmailFromToken(accessToken);
         
         // 리프레시 토큰 삭제는 복잡하므로 생략 (토큰 만료로 자연 삭제)
         // Redis에서 email 기반 검색/삭제는 복잡함 - 향후 개선 필요

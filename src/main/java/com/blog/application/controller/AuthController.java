@@ -16,6 +16,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -68,10 +70,11 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
             @ApiResponse(responseCode = "400", description = "유효하지 않은 토큰")
     })
-    public ResponseEntity<Void> logout(HttpServletRequest request) {
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetails userDetails,
+                                       HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
-        String email = authService.getEmailFromToken(authHeader);
-        authService.logout(authHeader);
+        String email = userDetails.getUsername(); // JWT 필터에서 email을 username으로 설정
+        authService.logout(authHeader, email);
         eventLogService.logLogoutEvent(email);
         return ResponseEntity.ok().build();
     }
