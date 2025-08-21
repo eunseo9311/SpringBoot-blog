@@ -34,13 +34,9 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 (이메일 중복, 유효성 검사 실패)")
     })
     public ResponseEntity<SignupResponseDTO> signup(@Valid @RequestBody SignupRequestDTO signupRequest) {
-        try {
-            SignupResponseDTO response = authService.signup(signupRequest);
-            eventLogService.logSignupEvent(signupRequest.getEmail(), signupRequest.getNickname(), response.getUserId());
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (IllegalArgumentException | com.blog.application.exception.AuthException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        SignupResponseDTO response = authService.signup(signupRequest);
+        eventLogService.logSignupEvent(signupRequest.getEmail(), signupRequest.getNickname(), response.getUserId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     
     @PostMapping("/login")
@@ -50,14 +46,9 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "잘못된 로그인 정보")
     })
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
-        try {
-            LoginResponseDTO response = authService.login(loginRequest);
-            eventLogService.logLoginEvent(loginRequest.getEmail(), true, null);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException | com.blog.application.exception.AuthException e) {
-            eventLogService.logLoginEvent(loginRequest.getEmail(), false, e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        LoginResponseDTO response = authService.login(loginRequest);
+        eventLogService.logLoginEvent(loginRequest.getEmail(), true, null);
+        return ResponseEntity.ok(response);
     }
     
     @PostMapping("/refresh")
@@ -67,16 +58,8 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "유효하지 않은 리프레시 토큰")
     })
     public ResponseEntity<LoginResponseDTO> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO refreshRequest) {
-        try {
-            LoginResponseDTO response = authService.refreshToken(refreshRequest);
-            String email = authService.getEmailFromRefreshToken(refreshRequest.getRefreshToken());
-            eventLogService.logTokenRefreshEvent(email, true);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException | com.blog.application.exception.AuthException e) {
-            String email = authService.getEmailFromRefreshToken(refreshRequest.getRefreshToken());
-            eventLogService.logTokenRefreshEvent(email != null ? email : "unknown", false);
-            return ResponseEntity.badRequest().build();
-        }
+        LoginResponseDTO response = authService.refreshToken(refreshRequest);
+        return ResponseEntity.ok(response);
     }
     
     @PostMapping("/logout")
@@ -86,15 +69,11 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "유효하지 않은 토큰")
     })
     public ResponseEntity<Void> logout(HttpServletRequest request) {
-        try {
-            String authHeader = request.getHeader("Authorization");
-            String email = authService.getEmailFromToken(authHeader);
-            authService.logout(authHeader);
-            eventLogService.logLogoutEvent(email);
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException | com.blog.application.exception.AuthException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        String authHeader = request.getHeader("Authorization");
+        String email = authService.getEmailFromToken(authHeader);
+        authService.logout(authHeader);
+        eventLogService.logLogoutEvent(email);
+        return ResponseEntity.ok().build();
     }
 }
 

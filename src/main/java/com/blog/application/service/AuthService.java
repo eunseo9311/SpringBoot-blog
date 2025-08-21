@@ -26,6 +26,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService tokenBlacklistService;
+    private final EventLogService eventLogService;
     
     public SignupResponseDTO signup(SignupRequestDTO signupRequest) {
         // 이메일 중복 검사
@@ -46,10 +47,14 @@ public class AuthService {
     public LoginResponseDTO login(LoginRequestDTO loginRequest) {
         // 사용자 조회
         User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new AuthException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> {
+                    eventLogService.logLoginEvent(loginRequest.getEmail(), false, "존재하지 않는 사용자입니다.");
+                    return new AuthException("존재하지 않는 사용자입니다.");
+                });
         
         // 비밀번호 검증
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            eventLogService.logLoginEvent(loginRequest.getEmail(), false, "비밀번호가 일치하지 않습니다.");
             throw new AuthException("비밀번호가 일치하지 않습니다.");
         }
         
@@ -66,12 +71,15 @@ public class AuthService {
     public LoginResponseDTO refreshToken(RefreshTokenRequestDTO refreshRequest) {
         // 리프레시 토큰 검증
         if (!jwtUtil.validateToken(refreshRequest.getRefreshToken())) {
+            String email = getEmailFromRefreshToken(refreshRequest.getRefreshToken());
+            eventLogService.logTokenRefreshEvent(email != null ? email : "unknown", false);
             throw new AuthException("유효하지 않은 리프레시 토큰입니다.");
         }
         
         // 저장된 리프레시 토큰 조회
         String email = refreshTokenService.getRefreshTokenEmail(refreshRequest.getRefreshToken());
         if (email == null) {
+            eventLogService.logTokenRefreshEvent("unknown", false);
             throw new AuthException("존재하지 않는 리프레시 토큰입니다.");
         }
         
@@ -82,6 +90,9 @@ public class AuthService {
         // 기존 리프레시 토큰 삭제 후 새 토큰 저장
         refreshTokenService.deleteRefreshToken(refreshRequest.getRefreshToken());
         refreshTokenService.saveRefreshToken(newRefreshToken, email, 1209600L);
+        
+        // 토큰 갱신 성공 로그
+        eventLogService.logTokenRefreshEvent(email, true);
         
         return new LoginResponseDTO(newAccessToken, newRefreshToken, jwtUtil.getAccessTokenValidityMs() / 1000);
     }
