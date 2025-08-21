@@ -15,7 +15,7 @@ public class Article {
     private String title;
     private String content;
     // 각 게시글은 반드시 작성자(User)를 가져야 하며, LAZY 로딩 적용
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     // LAZY(지연 로딩) : 관련된 엔티티를 실제로 필요할 때까지 데이터베이스에서 조회하지 않는 전략, 반대는 EAGER 로딩임
     // 예를 들어, Article 객체를 조회할 때 연관된 User 엔티티는 바로 가져오지 않고, getUser()를 호출하는 순간 로딩된다
     // n+1 : 한 게시물에 n개의 댓글이 달리면, 연관관계가 맺어지면 JPA 게시글 조회 이후에 따로 select를 날리는데 그럼 n+1을 날리기 때문에 db상 좋지 않음,

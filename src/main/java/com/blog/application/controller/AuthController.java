@@ -11,7 +11,6 @@ import com.blog.application.service.AuthService;
 import com.blog.application.service.EventLogService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,9 +32,9 @@ public class AuthController {
     
     @PostMapping("/signup")
     @Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다.")
-    @ApiResponses(value = {
-            @SwaggerApiResponse(responseCode = "201", description = "회원가입 성공"),
-            @SwaggerApiResponse(responseCode = "400", description = "잘못된 요청 (이메일 중복, 유효성 검사 실패)")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "회원가입 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 (이메일 중복, 유효성 검사 실패)")
     })
     public ResponseEntity<ApiResponse<SignupResponseDTO>> signup(@Valid @RequestBody SignupRequestDTO signupRequest) {
         SignupResponseDTO response = authService.signup(signupRequest);
@@ -46,9 +45,9 @@ public class AuthController {
     
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "사용자 인증 후 JWT 토큰을 발급합니다.")
-    @ApiResponses(value = {
-            @SwaggerApiResponse(responseCode = "200", description = "로그인 성공"),
-            @SwaggerApiResponse(responseCode = "400", description = "잘못된 로그인 정보")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 로그인 정보")
     })
     public ResponseEntity<ApiResponse<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
         LoginResponseDTO response = authService.login(loginRequest);
@@ -58,9 +57,9 @@ public class AuthController {
     
     @PostMapping("/refresh")
     @Operation(summary = "토큰 갱신", description = "리프레시 토큰을 이용하여 새로운 액세스 토큰을 발급합니다.")
-    @ApiResponses(value = {
-            @SwaggerApiResponse(responseCode = "200", description = "토큰 갱신 성공"),
-            @SwaggerApiResponse(responseCode = "400", description = "유효하지 않은 리프레시 토큰")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "토큰 갱신 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "유효하지 않은 리프레시 토큰")
     })
     public ResponseEntity<ApiResponse<LoginResponseDTO>> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO refreshRequest) {
         LoginResponseDTO response = authService.refreshToken(refreshRequest);
@@ -69,9 +68,9 @@ public class AuthController {
     
     @PostMapping("/logout")
     @Operation(summary = "로그아웃", description = "액세스 토큰을 무효화하고 리프레시 토큰을 삭제합니다.")
-    @ApiResponses(value = {
-            @SwaggerApiResponse(responseCode = "200", description = "로그아웃 성공"),
-            @SwaggerApiResponse(responseCode = "400", description = "유효하지 않은 토큰")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그아웃 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "유효하지 않은 토큰")
     })
     public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal UserDetails userDetails,
                                                     HttpServletRequest request) {

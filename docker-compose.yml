@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # Spring Boot 애플리케이션
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: springboot-blog-app
+    ports:
+      - "8080:8080"
+    environment:
+      # Spring Boot 프로파일
+      - SPRING_PROFILES_ACTIVE=docker
+      # Redis 연결 설정
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_DATABASE=0
+      # JWT 설정
+      - JWT_SECRET=your-production-secret-key-must-be-at-least-256-bits-long-for-security
+      # 데이터베이스 설정 (H2 파일 모드)
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/app/data/blogdb
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - blog-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Redis 캐시 서버
+  redis:
+    image: redis:7-alpine
+    container_name: springboot-blog-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - blog-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 개발용 PostgreSQL (선택사항)
+  postgres:
+    image: postgres:15-alpine
+    container_name: springboot-blog-postgres
+    environment:
+      - POSTGRES_DB=blogdb
+      - POSTGRES_USER=blog_user
+      - POSTGRES_PASSWORD=blog_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - blog-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blog_user -d blogdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - postgres
+
+volumes:
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
+
+networks:
+  blog-network:
+    driver: bridge

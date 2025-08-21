@@ -1,35 +1,29 @@
 -- 초기 블로그 스키마 생성
 -- User, Article, Comment 테이블 및 기본 제약조건 정의
 
--- 사용자 테이블
-CREATE TABLE users (
+-- 사용자 테이블 (예약어 user를 위해 따옴표 사용)
+CREATE TABLE "user" (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
-    username VARCHAR(100) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    nickname VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL
 );
 
 -- 게시글 테이블
-CREATE TABLE article (
+CREATE TABLE "article" (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(500) NOT NULL,
-    content TEXT NOT NULL,
+    title VARCHAR(500),
+    content TEXT,
     user_id BIGINT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_article_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_article_user FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
 );
 
 -- 댓글 테이블  
 CREATE TABLE comment (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    content TEXT NOT NULL,
-    user_id BIGINT NOT NULL,
-    article_id BIGINT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_comment_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT fk_comment_article FOREIGN KEY (article_id) REFERENCES article(id) ON DELETE CASCADE
+    content VARCHAR(1000),
+    user_id BIGINT,
+    article_id BIGINT,
+    CONSTRAINT fk_comment_user FOREIGN KEY (user_id) REFERENCES "user"(id),
+    CONSTRAINT fk_comment_article FOREIGN KEY (article_id) REFERENCES "article"(id)
 );

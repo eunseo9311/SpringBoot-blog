@@ -1,0 +1,47 @@
+# Git 관련
+.git
+.gitignore
+README.md
+PHASE1_CODE_IMPROVEMENTS.md
+
+# Gradle 빌드 결과물
+build/
+.gradle/
+
+# IDE 설정
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# 로그 파일
+*.log
+logs/
+
+# 운영체제 파일
+.DS_Store
+Thumbs.db
+
+# 임시 파일
+*.tmp
+*.swp
+*.swo
+
+# 데이터베이스 파일
+data/
+*.db
+*.mv.db
+*.trace.db
+
+# Docker 관련
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# CI/CD 관련
+.github/
+
+# 테스트 결과
+coverage/
+test-results/

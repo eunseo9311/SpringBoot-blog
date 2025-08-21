@@ -3,18 +3,12 @@
 
 -- 사용자 이메일 조회 최적화 (로그인 시 사용)
 -- UNIQUE 제약조건이 있지만 명시적 인덱스 생성
-CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_user_email ON "user"(email);
 
 -- 게시글 조회 최적화
-CREATE INDEX idx_article_user_id ON article(user_id);
-CREATE INDEX idx_article_created_at ON article(created_at DESC);
-CREATE INDEX idx_article_user_created ON article(user_id, created_at DESC);
+CREATE INDEX idx_article_user_id ON "article"(user_id);
+CREATE INDEX idx_article_title ON "article"(title);
 
--- 댓글 조회 최적화
+-- 댓글 조회 최적화  
 CREATE INDEX idx_comment_article_id ON comment(article_id);
 CREATE INDEX idx_comment_user_id ON comment(user_id);
-CREATE INDEX idx_comment_article_created ON comment(article_id, created_at DESC);
-
--- 전체 컨텐츠 최신순 조회 최적화
-CREATE INDEX idx_article_title_created ON article(title, created_at DESC);
-CREATE INDEX idx_comment_created_at ON comment(created_at DESC);
