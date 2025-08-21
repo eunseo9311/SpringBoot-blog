@@ -1,5 +1,7 @@
 package com.blog.application.exception;
 
+import com.blog.application.common.response.ApiResponse;
+import com.blog.application.common.status.ErrorStatus;
 import com.blog.application.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -15,52 +17,34 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(
+    public ResponseEntity<ApiResponse<Void>> handleException(
             Exception e, HttpServletRequest request) {
         
-        ErrorResponse errorResponse = new ErrorResponse(
-            "서버에서 오류가 발생했습니다.",
-            "INTERNAL_SERVER_ERROR",
-            request.getRequestURI()
-        );
-        
         return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(errorResponse);
+            .status(ErrorStatus.INTERNAL_SERVER_ERROR.getHttpStatus())
+            .body(ApiResponse.error(ErrorStatus.INTERNAL_SERVER_ERROR));
     }
     
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(
             IllegalArgumentException e, HttpServletRequest request) {
         
-        ErrorResponse errorResponse = new ErrorResponse(
-            e.getMessage(),
-            "BAD_REQUEST",
-            request.getRequestURI()
-        );
-        
         return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(errorResponse);
+            .status(ErrorStatus.BAD_REQUEST.getHttpStatus())
+            .body(ApiResponse.error(ErrorStatus.BAD_REQUEST, e.getMessage()));
     }
     
     @ExceptionHandler(AuthException.class)
-    public ResponseEntity<ErrorResponse> handleAuthException(
+    public ResponseEntity<ApiResponse<Void>> handleAuthException(
             AuthException e, HttpServletRequest request) {
         
-        ErrorResponse errorResponse = new ErrorResponse(
-            e.getMessage(),
-            e.getErrorCode(),
-            request.getRequestURI()
-        );
-        
         return ResponseEntity
-            .status(HttpStatus.UNAUTHORIZED)
-            .body(errorResponse);
+            .status(ErrorStatus.UNAUTHORIZED.getHttpStatus())
+            .body(ApiResponse.error(ErrorStatus.UNAUTHORIZED, e.getMessage()));
     }
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(
+    public ResponseEntity<ApiResponse<List<ErrorResponse.FieldError>>> handleValidationException(
             MethodArgumentNotValidException e, HttpServletRequest request) {
         
         List<ErrorResponse.FieldError> fieldErrors = e.getBindingResult()
@@ -73,13 +57,8 @@ public class GlobalExceptionHandler {
             ))
             .collect(Collectors.toList());
         
-        ErrorResponse errorResponse = new ErrorResponse(
-            "입력값이 올바르지 않습니다.",
-            fieldErrors
-        );
-        
         return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(errorResponse);
+            .status(ErrorStatus.VALIDATION_ERROR.getHttpStatus())
+            .body(ApiResponse.error(ErrorStatus.VALIDATION_ERROR, fieldErrors));
     }
 }
