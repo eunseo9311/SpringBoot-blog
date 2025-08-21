@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    # Testcontainer에서 동적으로 설정됨
+    url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: false
+
+jwt:
+  secret: test-secret-key-must-be-at-least-256-bits-for-testing-with-testcontainers
+  access-token-validity-ms: 3600000
+  refresh-token-validity-ms: 1209600000
+
+logging:
+  level:
+    com.blog.application: INFO
+    org.testcontainers: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO
+    root: WARN
