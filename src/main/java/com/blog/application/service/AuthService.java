@@ -8,7 +8,7 @@ import com.blog.application.request.RefreshTokenRequestDTO;
 import com.blog.application.request.SignupRequestDTO;
 import com.blog.application.response.LoginResponseDTO;
 import com.blog.application.response.SignupResponseDTO;
-import com.blog.application.security.JwtUtil;
+import com.blog.application.common.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
+    private final JwtTokenProvider jwtTokenProvider;
     private final TokenBlacklistService tokenBlacklistService;
     private final EventLogService eventLogService;
     
@@ -59,19 +59,19 @@ public class AuthService {
         }
         
         // 토큰 생성
-        String accessToken = jwtUtil.generateAccessToken(user.getEmail());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getEmail());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail());
         
         // RefreshToken을 메모리에 저장 (TTL은 JWT 자체 만료로 처리)
         refreshTokenService.saveRefreshToken(refreshToken, user.getEmail(), 1209600L);
         
-        return new LoginResponseDTO(accessToken, refreshToken, jwtUtil.getAccessTokenValidityMs() / 1000);
+        return new LoginResponseDTO(accessToken, refreshToken, jwtTokenProvider.getAccessTokenValidityInSeconds());
     }
     
     public LoginResponseDTO refreshToken(RefreshTokenRequestDTO refreshRequest) {
         // 리프레시 토큰 검증
-        if (!jwtUtil.validateToken(refreshRequest.getRefreshToken())) {
-            String email = getEmailFromRefreshToken(refreshRequest.getRefreshToken());
+        if (!jwtTokenProvider.validateToken(refreshRequest.getRefreshToken())) {
+            String email = jwtTokenProvider.getEmailFromToken(refreshRequest.getRefreshToken());
             eventLogService.logTokenRefreshEvent(email != null ? email : "unknown", false);
             throw new AuthException("유효하지 않은 리프레시 토큰입니다.");
         }
@@ -84,8 +84,8 @@ public class AuthService {
         }
         
         // 새로운 토큰 생성 (토큰 로테이션)
-        String newAccessToken = jwtUtil.generateAccessToken(email);
-        String newRefreshToken = jwtUtil.generateRefreshToken(email);
+        String newAccessToken = jwtTokenProvider.generateAccessToken(email);
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(email);
         
         // 기존 리프레시 토큰 삭제 후 새 토큰 저장
         refreshTokenService.deleteRefreshToken(refreshRequest.getRefreshToken());
@@ -94,21 +94,18 @@ public class AuthService {
         // 토큰 갱신 성공 로그
         eventLogService.logTokenRefreshEvent(email, true);
         
-        return new LoginResponseDTO(newAccessToken, newRefreshToken, jwtUtil.getAccessTokenValidityMs() / 1000);
+        return new LoginResponseDTO(newAccessToken, newRefreshToken, jwtTokenProvider.getAccessTokenValidityInSeconds());
     }
     
-    public void logout(String accessToken, String email) {
+    public void logout(String authHeader, String email) {
+        String accessToken = jwtTokenProvider.extractToken(authHeader);
+        
         if (accessToken == null || accessToken.isEmpty()) {
             throw new IllegalArgumentException("액세스 토큰이 필요합니다.");
         }
         
-        // Bearer 토큰에서 실제 토큰 추출
-        if (accessToken.startsWith("Bearer ")) {
-            accessToken = accessToken.substring(7);
-        }
-        
         // 토큰 검증
-        if (!jwtUtil.validateToken(accessToken)) {
+        if (!jwtTokenProvider.validateToken(accessToken)) {
             throw new AuthException("유효하지 않은 토큰입니다.");
         }
         
@@ -117,33 +114,8 @@ public class AuthService {
         
         // 액세스 토큰 블랙리스트 등록
         // JWT의 만료 시간까지만 블랙리스트에 보관
-        long accessTokenExpirationTime = System.currentTimeMillis() + jwtUtil.getAccessTokenValidityMs();
+        long accessTokenExpirationTime = jwtTokenProvider.calculateExpirationTime();
         tokenBlacklistService.blacklistToken(accessToken, accessTokenExpirationTime);
-    }
-    
-    public String getEmailFromToken(String authHeader) {
-        if (authHeader == null || authHeader.isEmpty()) {
-            return null;
-        }
-        
-        String token = authHeader;
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
-        
-        try {
-            return jwtUtil.getEmailFromToken(token);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-    
-    public String getEmailFromRefreshToken(String refreshToken) {
-        try {
-            return jwtUtil.getEmailFromToken(refreshToken);
-        } catch (Exception e) {
-            return null;
-        }
     }
 }
 

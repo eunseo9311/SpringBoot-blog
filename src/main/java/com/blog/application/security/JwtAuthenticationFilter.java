@@ -1,5 +1,6 @@
 package com.blog.application.security;
 
+import com.blog.application.common.jwt.JwtTokenProvider;
 import com.blog.application.entity.User;
 import com.blog.application.repository.jpa.UserRepository;
 import com.blog.application.service.TokenBlacklistService;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
-    private final JwtUtil jwtUtil;
+    private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
     private final TokenBlacklistService tokenBlacklistService;
     
@@ -35,11 +36,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+            String token = jwtTokenProvider.extractToken(authHeader);
             
             // 토큰 유효성 검사 및 블랙리스트 확인
-            if (jwtUtil.validateToken(token) && !tokenBlacklistService.isTokenBlacklisted(token)) {
-                String email = jwtUtil.getEmailFromToken(token);
+            if (jwtTokenProvider.validateToken(token) && !tokenBlacklistService.isTokenBlacklisted(token)) {
+                String email = jwtTokenProvider.getEmailFromToken(token);
                 Optional<User> userOptional = userRepository.findByEmail(email);
                 
                 if (userOptional.isPresent()) {
