@@ -9,6 +9,7 @@ import com.blog.application.request.SignupRequestDTO;
 import com.blog.application.response.LoginResponseDTO;
 import com.blog.application.response.SignupResponseDTO;
 import com.blog.application.security.JwtUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class AuthService {
     
     private final UserRepository userRepository;
@@ -24,18 +26,6 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService tokenBlacklistService;
-    
-    public AuthService(UserRepository userRepository,
-                      RefreshTokenService refreshTokenService,
-                      PasswordEncoder passwordEncoder,
-                      JwtUtil jwtUtil,
-                      TokenBlacklistService tokenBlacklistService) {
-        this.userRepository = userRepository;
-        this.refreshTokenService = refreshTokenService;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtUtil = jwtUtil;
-        this.tokenBlacklistService = tokenBlacklistService;
-    }
     
     public SignupResponseDTO signup(SignupRequestDTO signupRequest) {
         // 이메일 중복 검사

@@ -8,6 +8,7 @@ import com.blog.application.response.SignupResponseDTO;
 import com.blog.application.service.AuthService;
 import com.blog.application.service.EventLogService;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,15 +21,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @Tag(name = "Authentication", description = "인증 관련 API")
+@RequiredArgsConstructor
 public class AuthController {
     
     private final AuthService authService;
     private final EventLogService eventLogService;
-    
-    public AuthController(AuthService authService, EventLogService eventLogService) {
-        this.authService = authService;
-        this.eventLogService = eventLogService;
-    }
     
     @PostMapping("/signup")
     @Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다.")
