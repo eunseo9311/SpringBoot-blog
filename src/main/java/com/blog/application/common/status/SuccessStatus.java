@@ -19,6 +19,8 @@ public enum SuccessStatus {
     ARTICLE_READ_SUCCESS(HttpStatus.OK, "B002", "게시글을 성공적으로 조회했습니다."),
     ARTICLE_UPDATE_SUCCESS(HttpStatus.OK, "B003", "게시글이 성공적으로 수정되었습니다."),
     ARTICLE_DELETE_SUCCESS(HttpStatus.OK, "B004", "게시글이 성공적으로 삭제되었습니다."),
+    ARTICLE_LIKE_SUCCESS(HttpStatus.OK, "B005", "좋아요 처리가 완료되었습니다."),
+    ARTICLE_BOOKMARK_SUCCESS(HttpStatus.OK, "B006", "북마크 처리가 완료되었습니다."),
     
     // 댓글 관련
     COMMENT_CREATE_SUCCESS(HttpStatus.CREATED, "C001", "댓글이 성공적으로 작성되었습니다."),

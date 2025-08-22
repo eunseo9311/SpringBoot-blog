@@ -39,6 +39,7 @@ public class SecurityConfig {
                         // 게시글 조회는 public, 나머지는 인증 필요
                         .requestMatchers("GET", "/articles", "/articles/*").permitAll()
                         .requestMatchers("GET", "/articles/*/comments", "/articles/*/comments/").permitAll()
+                        .requestMatchers("GET", "/articles/*/like/status", "/articles/*/bookmark/status").permitAll()
                         .requestMatchers("/articles/**").authenticated()
                         .anyRequest().authenticated()
                 )
