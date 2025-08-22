@@ -39,7 +39,7 @@ public class CommentController {
     public ResponseEntity<List<CommentDTO>> getComments(@Parameter(description = "게시글 ID") @PathVariable Long articleId) {
         List<Comment> comments = commentService.getCommentsByArticleId(articleId);
         return new ResponseEntity<>(comments.stream()
-                .map(comment -> new CommentDTO(comment.getId(), comment.getContent(), comment.getUser().getEmail()))
+                .map(comment -> new CommentDTO(comment.getId(), comment.getUser().getEmail(), comment.getContent()))
                 .toList(), HttpStatus.OK);
     }
 

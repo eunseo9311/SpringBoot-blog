@@ -13,10 +13,12 @@ public class Comment {
 
     // 여러 댓글은 하나의 User에 속함 (다대일 관계)
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     // 여러 댓글은 하나의 Article에 속함 (다대일 관계)
     @ManyToOne
+    @JoinColumn(name = "article_id")
     private Article article;
 
     // getter
