@@ -36,6 +36,10 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/actuator/**").authenticated()
+                        // 게시글 조회는 public, 나머지는 인증 필요
+                        .requestMatchers("GET", "/articles", "/articles/*").permitAll()
+                        .requestMatchers("GET", "/articles/*/comments", "/articles/*/comments/").permitAll()
+                        .requestMatchers("/articles/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())) // H2 Console용
