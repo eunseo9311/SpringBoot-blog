@@ -14,6 +14,9 @@ public class Article {
 
     private String title;
     private String content;
+    
+    @Column(name = "like_count", nullable = false)
+    private Long likeCount = 0L;
     // 각 게시글은 반드시 작성자(User)를 가져야 하며, LAZY 로딩 적용
     @ManyToOne(fetch = FetchType.LAZY)
     // LAZY(지연 로딩) : 관련된 엔티티를 실제로 필요할 때까지 데이터베이스에서 조회하지 않는 전략, 반대는 EAGER 로딩임
@@ -28,10 +31,11 @@ public class Article {
     }
 
     // 생성자: 제목, 내용, 작성자 설정
-    public Article(String title, String content,User user) {
+    public Article(String title, String content, User user) {
         this.title = title;
         this.content = content;
         this.user = user;
+        this.likeCount = 0L; // 초기값 설정
     }
 
     // Getter & Setter 메서드들
@@ -66,6 +70,26 @@ public class Article {
 
     public void setContent(String content) {
         this.content = content;
+    }
+    
+    public Long getLikeCount() {
+        return likeCount;
+    }
+    
+    public void setLikeCount(Long likeCount) {
+        this.likeCount = likeCount;
+    }
+    
+    // 비즈니스 메서드: 좋아요 개수 증가
+    public void incrementLikeCount() {
+        this.likeCount++;
+    }
+    
+    // 비즈니스 메서드: 좋아요 개수 감소
+    public void decrementLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
     }
 }
 
