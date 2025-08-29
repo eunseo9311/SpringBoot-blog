@@ -136,8 +136,8 @@ brew install redis && brew services start redis
 - [x] 테스트 자동화 및 커버리지
 
 ### Phase 2: 핵심 기능 개발 (예정)
-- [ ] 게시글 CRUD API 
-- [ ] 댓글 시스템
+- [x] 북마크/좋아요 기능
+- [ ] 재댓글 시스템
 - [ ] 파일 업로드
 - [ ] 검색 기능
 
